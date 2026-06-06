@@ -1,0 +1,653 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: Shadow Garden Bot Web API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: auth
+    description: Authentication
+  - name: profile
+    description: User profile
+  - name: leaderboard
+    description: Leaderboard
+  - name: pokemon
+    description: Pokemon
+  - name: cards
+    description: Cards
+  - name: shop
+    description: Shop
+  - name: stats
+    description: Bot statistics
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /auth/request-otp:
+    post:
+      operationId: requestOtp
+      tags: [auth]
+      summary: Request OTP via WhatsApp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequestOtpBody"
+      responses:
+        "200":
+          description: OTP request result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RequestOtpResponse"
+
+  /auth/verify-otp:
+    post:
+      operationId: verifyOtp
+      tags: [auth]
+      summary: Verify OTP and get JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerifyOtpBody"
+      responses:
+        "200":
+          description: Auth result with JWT token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid OTP
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current authenticated user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+        "401":
+          description: Not authenticated
+
+  /profile:
+    get:
+      operationId: getProfile
+      tags: [profile]
+      summary: Get current user's profile
+      responses:
+        "200":
+          description: Profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+    put:
+      operationId: updateProfile
+      tags: [profile]
+      summary: Update current user's profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProfileBody"
+      responses:
+        "200":
+          description: Updated profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+
+  /users/{phone}/profile:
+    get:
+      operationId: getUserProfile
+      tags: [profile]
+      summary: Get another user's profile by phone
+      parameters:
+        - name: phone
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+        "404":
+          description: Not found
+
+  /leaderboard:
+    get:
+      operationId: getLeaderboard
+      tags: [leaderboard]
+      summary: Get XP leaderboard
+      parameters:
+        - name: type
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [xp, rich]
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Leaderboard
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LeaderboardEntry"
+
+  /pokemon:
+    get:
+      operationId: getUserPokemon
+      tags: [pokemon]
+      summary: Get current user's pokemon
+      responses:
+        "200":
+          description: User pokemon list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserPokemon"
+
+  /pokemon/dex:
+    get:
+      operationId: getPokemonDex
+      tags: [pokemon]
+      summary: Browse pokemon from PokeAPI
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Pokemon dex list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PokemonDexResponse"
+
+  /cards:
+    get:
+      operationId: listCards
+      tags: [cards]
+      summary: Browse all cards
+      parameters:
+        - name: tier
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: series
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: name
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Cards list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CardsResponse"
+
+  /cards/mine:
+    get:
+      operationId: getMyCards
+      tags: [cards]
+      summary: Get current user's card collection
+      responses:
+        "200":
+          description: User's cards
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserCard"
+
+  /shop:
+    get:
+      operationId: getShop
+      tags: [shop]
+      summary: Get shop items
+      parameters:
+        - name: type
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Shop items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ShopItem"
+
+  /shop/buy:
+    post:
+      operationId: buyItem
+      tags: [shop]
+      summary: Purchase a shop item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BuyItemBody"
+      responses:
+        "200":
+          description: Purchase result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BuyItemResponse"
+
+  /inventory:
+    get:
+      operationId: getInventory
+      tags: [shop]
+      summary: Get current user's inventory
+      responses:
+        "200":
+          description: Inventory
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/InventoryItem"
+
+  /stats:
+    get:
+      operationId: getBotStats
+      tags: [stats]
+      summary: Get bot statistics
+      responses:
+        "200":
+          description: Bot stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BotStats"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required: [status]
+
+    RequestOtpBody:
+      type: object
+      properties:
+        phone:
+          type: string
+      required: [phone]
+
+    RequestOtpResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+        message:
+          type: string
+        devOtp:
+          type: ["string", "null"]
+      required: [ok, message]
+
+    VerifyOtpBody:
+      type: object
+      properties:
+        phone:
+          type: string
+        otp:
+          type: string
+        name:
+          type: ["string", "null"]
+      required: [phone, otp]
+
+    AuthResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+        token:
+          type: string
+        user:
+          $ref: "#/components/schemas/UserProfile"
+        isNewUser:
+          type: boolean
+      required: [ok, token, user, isNewUser]
+
+    UserProfile:
+      type: object
+      properties:
+        phone:
+          type: string
+        name:
+          type: string
+        bio:
+          type: string
+        title:
+          type: string
+        role:
+          type: string
+        level:
+          type: integer
+        xp:
+          type: integer
+        wallet:
+          type: integer
+        bank:
+          type: integer
+        gems:
+          type: integer
+        streak:
+          type: integer
+        premium:
+          type: boolean
+        banned:
+          type: boolean
+        profilePp:
+          type: ["string", "null"]
+        profileBg:
+          type: ["string", "null"]
+        profileFrame:
+          type: integer
+        pokemonBadges:
+          type: integer
+        pokemonWins:
+          type: integer
+        pokemonLosses:
+          type: integer
+        reputation:
+          type: integer
+        className:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+      required:
+        - phone
+        - name
+        - bio
+        - title
+        - role
+        - level
+        - xp
+        - wallet
+        - bank
+        - gems
+        - streak
+        - premium
+        - banned
+        - profileFrame
+        - pokemonBadges
+        - pokemonWins
+        - pokemonLosses
+        - reputation
+        - createdAt
+
+    UpdateProfileBody:
+      type: object
+      properties:
+        name:
+          type: string
+        bio:
+          type: string
+        profilePp:
+          type: string
+        profileBg:
+          type: string
+        profileFrame:
+          type: integer
+
+    LeaderboardEntry:
+      type: object
+      properties:
+        rank:
+          type: integer
+        phone:
+          type: string
+        name:
+          type: string
+        level:
+          type: integer
+        xp:
+          type: integer
+        wallet:
+          type: integer
+        bank:
+          type: integer
+        role:
+          type: string
+        profilePp:
+          type: ["string", "null"]
+        profileFrame:
+          type: integer
+      required: [rank, phone, name, level, xp, wallet, bank, role, profileFrame]
+
+    UserPokemon:
+      type: object
+      properties:
+        id:
+          type: string
+        pokemonId:
+          type: integer
+        name:
+          type: string
+        level:
+          type: integer
+        xp:
+          type: integer
+        hp:
+          type: integer
+        maxHp:
+          type: integer
+        inParty:
+          type: boolean
+        isShiny:
+          type: boolean
+        types:
+          type: array
+          items:
+            type: string
+        sprite:
+          type: ["string", "null"]
+        ball:
+          type: string
+        slot:
+          type: integer
+      required: [id, pokemonId, name, level, xp, hp, maxHp, inParty, isShiny, types, ball, slot]
+
+    PokemonDexEntry:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        sprite:
+          type: string
+        types:
+          type: array
+          items:
+            type: string
+      required: [id, name, sprite, types]
+
+    PokemonDexResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/PokemonDexEntry"
+        total:
+          type: integer
+        page:
+          type: integer
+      required: [results, total, page]
+
+    Card:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        tier:
+          type: string
+        series:
+          type: string
+        price:
+          type: integer
+        imageUrl:
+          type: ["string", "null"]
+        rarity:
+          type: string
+        uploadedBy:
+          type: string
+        externalId:
+          type: ["string", "null"]
+      required: [id, name, tier, series, price, rarity, uploadedBy]
+
+    UserCard:
+      type: object
+      properties:
+        id:
+          type: string
+        inDeck:
+          type: boolean
+        card:
+          $ref: "#/components/schemas/Card"
+      required: [id, inDeck, card]
+
+    CardsResponse:
+      type: object
+      properties:
+        cards:
+          type: array
+          items:
+            $ref: "#/components/schemas/Card"
+        total:
+          type: integer
+        page:
+          type: integer
+      required: [cards, total, page]
+
+    ShopItem:
+      type: object
+      properties:
+        key:
+          type: string
+        name:
+          type: string
+        price:
+          type: integer
+        type:
+          type: string
+        description:
+          type: string
+        currency:
+          type: string
+      required: [key, name, price, type, description, currency]
+
+    BuyItemBody:
+      type: object
+      properties:
+        itemKey:
+          type: string
+      required: [itemKey]
+
+    BuyItemResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+        message:
+          type: string
+        newBalance:
+          type: integer
+      required: [ok, message, newBalance]
+
+    InventoryItem:
+      type: object
+      properties:
+        item:
+          type: string
+        quantity:
+          type: integer
+        emoji:
+          type: string
+      required: [item, quantity, emoji]
+
+    BotStats:
+      type: object
+      properties:
+        userCount:
+          type: integer
+        cardCount:
+          type: integer
+        groupCount:
+          type: integer
+        pokemonCount:
+          type: integer
+      required: [userCount, cardCount, groupCount, pokemonCount]
