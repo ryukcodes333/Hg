@@ -40,7 +40,7 @@ app.use("/api", router);
 // In production: serve the built React frontend as static files
 if (process.env.NODE_ENV === "production") {
   // Relative to dist/index.mjs → go up to repo root → artifacts/konosuba-bot/dist/public
-  const clientDist = join(__dirname, "..", "..", "..", "konosuba-bot", "dist", "public");
+  const clientDist = join(__dirname, "..", "..", "konosuba-bot", "dist", "public");
   app.use(express.static(clientDist));
   // SPA fallback — all non-API routes return index.html
   app.get(/^(?!\/api).*/, (_req, res) => {
