@@ -11,14 +11,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Search, ChevronLeft, ChevronRight, Box, Heart, Users, Star } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Box, Heart, Users } from "lucide-react";
 
 interface CardDetail {
   id: string;
   name: string;
   tier: string;
   series: string;
-  price: number;
   imageUrl: string | null;
   rarity: string;
   ownerCount: number;
@@ -27,11 +26,17 @@ interface CardDetail {
 }
 
 const TIER_COLORS: Record<string, string> = {
-  T5: "bg-yellow-500/80 text-black",
-  T4: "bg-purple-600",
-  T3: "bg-blue-500",
-  T2: "bg-green-600",
-  T1: "bg-zinc-600",
+  T5:  "bg-yellow-500/80 text-black",
+  T4:  "bg-purple-600",
+  T3:  "bg-blue-500",
+  T2:  "bg-green-600",
+  T1:  "bg-zinc-600",
+  TS:  "bg-amber-400 text-black",
+  C:   "bg-zinc-500",
+  R:   "bg-blue-500",
+  SR:  "bg-purple-600",
+  SSR: "bg-yellow-500/80 text-black",
+  UR:  "bg-red-500",
 };
 
 export default function Cards() {
@@ -59,7 +64,7 @@ export default function Cards() {
     query: { queryKey: getGetMyCardsQueryKey(), enabled: showOnlyMine && isAuthenticated },
   });
 
-  const cards = showOnlyMine ? myCards?.map((uc) => uc.card) : allCardsRes?.cards;
+  const cards = showOnlyMine ? myCards?.map((uc: any) => uc.card) : allCardsRes?.cards;
   const totalPages = allCardsRes ? Math.ceil(allCardsRes.total / 48) : 1;
   const isLoading = showOnlyMine ? myLoading : allLoading;
 
@@ -139,11 +144,17 @@ export default function Cards() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Tiers</SelectItem>
-              <SelectItem value="T1">Tier 1 (Common)</SelectItem>
-              <SelectItem value="T2">Tier 2 (Uncommon)</SelectItem>
-              <SelectItem value="T3">Tier 3 (Rare)</SelectItem>
-              <SelectItem value="T4">Tier 4 (Epic)</SelectItem>
-              <SelectItem value="T5">Tier 5 (Legendary)</SelectItem>
+              <SelectItem value="T1">T1 (Common)</SelectItem>
+              <SelectItem value="T2">T2 (Uncommon)</SelectItem>
+              <SelectItem value="T3">T3 (Rare)</SelectItem>
+              <SelectItem value="T4">T4 (Epic)</SelectItem>
+              <SelectItem value="T5">T5 (Legendary)</SelectItem>
+              <SelectItem value="TS">TS (Special)</SelectItem>
+              <SelectItem value="C">C (Mazoku)</SelectItem>
+              <SelectItem value="R">R (Mazoku)</SelectItem>
+              <SelectItem value="SR">SR (Mazoku)</SelectItem>
+              <SelectItem value="SSR">SSR (Mazoku)</SelectItem>
+              <SelectItem value="UR">UR (Mazoku)</SelectItem>
             </SelectContent>
           </Select>
           <div />
@@ -235,38 +246,40 @@ export default function Cards() {
         )}
       </div>
 
-      {/* Card Detail Sheet */}
+      {/* Card Detail Sheet — full card image, no cropping, no price */}
       <Sheet open={!!selectedCard || detailLoading} onOpenChange={(open) => { if (!open) setSelectedCard(null); }}>
-        <SheetContent side="bottom" className="h-[85vh] rounded-t-3xl bg-card border-t border-border/40 p-0 overflow-hidden">
+        <SheetContent
+          side="bottom"
+          className="h-[92vh] rounded-t-3xl bg-card border-t border-border/40 p-0 overflow-hidden flex flex-col"
+        >
           {detailLoading ? (
             <div className="flex items-center justify-center h-full">
               <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
             </div>
           ) : selectedCard ? (
             <div className="flex flex-col h-full overflow-y-auto">
-              {/* Card image hero */}
-              <div className="relative w-full h-[45%] shrink-0">
+              {/* Full card image — object-contain so the entire card shows, black bg for letterboxing */}
+              <div className="w-full bg-black shrink-0 flex items-center justify-center">
                 {selectedCard.imageUrl ? (
                   <img
                     src={selectedCard.imageUrl}
                     alt={selectedCard.name}
-                    className="w-full h-full object-cover"
+                    className="w-full max-h-[58vh] object-contain block"
                   />
                 ) : (
-                  <div className="w-full h-full bg-muted flex items-center justify-center">
+                  <div className="w-full h-48 flex items-center justify-center bg-muted">
                     <Box className="h-16 w-16 text-muted-foreground/20" />
                   </div>
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent" />
-                <div className="absolute bottom-4 left-5">
-                  <Badge className={`text-xs px-2 py-0.5 ${TIER_COLORS[selectedCard.tier] || "bg-primary/50"}`}>
-                    {selectedCard.tier}
-                  </Badge>
-                </div>
               </div>
 
-              {/* Info */}
-              <div className="flex-1 px-5 pt-4 pb-8 space-y-5">
+              {/* Info panel */}
+              <div className="flex-1 px-5 pt-4 pb-8 space-y-4 bg-card">
+                {/* Tier badge */}
+                <Badge className={`text-xs px-2.5 py-0.5 ${TIER_COLORS[selectedCard.tier] || "bg-primary/50"}`}>
+                  {selectedCard.tier}
+                </Badge>
+
                 <SheetHeader className="text-left p-0">
                   <SheetTitle className="text-xl font-black text-white leading-tight">
                     {selectedCard.name}
@@ -276,12 +289,11 @@ export default function Cards() {
                   </p>
                 </SheetHeader>
 
-                {/* Stats row */}
-                <div className="grid grid-cols-3 gap-3">
+                {/* Stats row — Owners + Wishlisted only (no price) */}
+                <div className="grid grid-cols-2 gap-3">
                   {[
-                    { icon: Users, label: "Owners", value: selectedCard.ownerCount },
+                    { icon: Users, label: "Owners",     value: selectedCard.ownerCount },
                     { icon: Heart, label: "Wishlisted", value: selectedCard.wishlistCount },
-                    { icon: Star, label: "Price", value: `$${selectedCard.price.toLocaleString()}` },
                   ].map(({ icon: Icon, label, value }) => (
                     <div key={label} className="bg-background/50 rounded-2xl p-3 text-center border border-border/30">
                       <Icon className="h-4 w-4 mx-auto mb-1 text-primary" />
