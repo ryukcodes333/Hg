@@ -125,7 +125,7 @@ export default function Home() {
       <section className="py-32 relative">
         <div className="container mx-auto px-4">
           <div className="text-center mb-20 space-y-4">
-            <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight">MASTER THE GARDEN</h2>
+            <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight">MASTER THE WORLD</h2>
             <div className="h-1.5 w-24 bg-primary mx-auto rounded-full" />
           </div>
 
@@ -158,7 +158,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="mt-auto py-12 border-t border-border/40 bg-card/20">
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-8">
-          <div className="text-2xl font-black text-primary tracking-tighter">SHADOW GARDEN</div>
+          <div className="text-2xl font-black text-primary tracking-tighter">KONOSUBA</div>
           
           <div className="flex gap-8">
             <Link href="/" className="text-sm font-bold text-muted-foreground hover:text-primary transition-colors">HOME</Link>
@@ -167,7 +167,7 @@ export default function Home() {
           </div>
           
           <div className="text-sm font-bold text-muted-foreground/60">
-            SHADOW GARDEN BOT © 2026
+            KONOSUBA BOT © 2026
           </div>
         </div>
       </footer>

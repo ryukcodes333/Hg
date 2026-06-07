@@ -15,31 +15,16 @@ export default function Profile() {
   const [, setLocation] = useLocation();
 
   const { data: profile, isLoading: profileLoading } = useGetProfile({
-    query: { 
-      queryKey: getGetProfileQueryKey(),
-      enabled: isAuthenticated 
-    },
+    query: { queryKey: getGetProfileQueryKey(), enabled: isAuthenticated },
   });
-
   const { data: cards, isLoading: cardsLoading } = useGetMyCards({
-    query: { 
-      queryKey: getGetMyCardsQueryKey(),
-      enabled: isAuthenticated 
-    },
+    query: { queryKey: getGetMyCardsQueryKey(), enabled: isAuthenticated },
   });
-
   const { data: inventory, isLoading: inventoryLoading } = useGetInventory({
-    query: { 
-      queryKey: getGetInventoryQueryKey(),
-      enabled: isAuthenticated 
-    },
+    query: { queryKey: getGetInventoryQueryKey(), enabled: isAuthenticated },
   });
-
   const { data: pokemon, isLoading: pokemonLoading } = useGetUserPokemon({
-    query: { 
-      queryKey: getGetUserPokemonQueryKey(),
-      enabled: isAuthenticated 
-    },
+    query: { queryKey: getGetUserPokemonQueryKey(), enabled: isAuthenticated },
   });
 
   if (!authLoading && !isAuthenticated) {
@@ -47,13 +32,9 @@ export default function Profile() {
     return null;
   }
 
-  const formatMoney = (n: number = 0) => {
-    return (n >= 1000) ? (n / 1000).toFixed(2) + 'K' : n.toString();
-  };
-
-  const formatXP = (n: number = 0) => {
-    return n.toLocaleString();
-  };
+  const formatMoney = (n: number = 0) =>
+    n >= 1000 ? (n / 1000).toFixed(2) + "K" : n.toString();
+  const formatXP = (n: number = 0) => n.toLocaleString();
 
   if (profileLoading || authLoading) {
     return (
@@ -77,13 +58,13 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-background pb-20 pt-20">
-      {/* Cover Header */}
+      {/* Cover */}
       <div className="h-[180px] w-full bg-gradient-to-br from-purple-900/40 to-blue-900/40 relative border-b border-border/10">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent" />
       </div>
 
-      {/* Avatar Section */}
       <div className="container mx-auto px-4">
+        {/* Avatar */}
         <div className="flex flex-col items-center -mt-[50px] relative z-10">
           <div className="relative">
             <div className="p-1 rounded-full bg-gradient-to-tr from-primary via-purple-500 to-primary-foreground animate-glow">
@@ -113,27 +94,27 @@ export default function Profile() {
             </p>
           </div>
 
-          {/* Action Buttons */}
           <div className="flex flex-wrap justify-center gap-2 mt-6">
-            <Button variant="outline" size="sm" className="h-8 rounded-full border-border/50 bg-card/30 backdrop-blur hover:bg-primary/20 hover:border-primary/50 text-xs">
-              Edit Avatar
-            </Button>
-            <Button variant="outline" size="sm" className="h-8 rounded-full border-border/50 bg-card/30 backdrop-blur hover:bg-primary/20 hover:border-primary/50 text-xs">
-              Edit Cover
-            </Button>
-            <Button variant="outline" size="sm" className="h-8 rounded-full border-border/50 bg-card/30 backdrop-blur hover:bg-primary/20 hover:border-primary/50 text-xs">
-              Edit Frame
-            </Button>
+            {["Edit Avatar", "Edit Cover", "Edit Frame"].map((label) => (
+              <Button
+                key={label}
+                variant="outline"
+                size="sm"
+                className="h-8 rounded-full border-border/50 bg-card/30 backdrop-blur hover:bg-primary/20 hover:border-primary/50 text-xs"
+              >
+                {label}
+              </Button>
+            ))}
           </div>
         </div>
 
-        {/* Stats Grid */}
+        {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-10 max-w-4xl mx-auto">
           {[
             { label: "Wallet", value: `$${formatMoney(profile.wallet)}`, icon: Wallet, color: "text-green-400" },
-            { label: "Bank", value: `$${formatMoney(profile.bank)}`, icon: Building2, color: "text-blue-400" },
-            { label: "Level", value: profile.level, icon: Star, color: "text-accent" },
-            { label: "XP", value: formatXP(profile.xp), icon: Zap, color: "text-primary" },
+            { label: "Bank",   value: `$${formatMoney(profile.bank)}`,   icon: Building2, color: "text-blue-400" },
+            { label: "Level",  value: profile.level,                     icon: Star, color: "text-accent" },
+            { label: "XP",     value: formatXP(profile.xp),              icon: Zap,  color: "text-primary" },
           ].map((stat, i) => (
             <motion.div
               key={stat.label}
@@ -144,9 +125,7 @@ export default function Profile() {
               <Card className="bg-card/40 border-border/40 backdrop-blur-sm overflow-hidden group hover:border-primary/30 transition-all">
                 <CardContent className="p-4 flex flex-col items-center text-center">
                   <stat.icon className={`h-5 w-5 ${stat.color} mb-2 group-hover:scale-110 transition-transform`} />
-                  <div className="text-xl font-bold text-white tracking-tight">
-                    {stat.value}
-                  </div>
+                  <div className="text-xl font-bold text-white tracking-tight">{stat.value}</div>
                   <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mt-1">
                     {stat.label}
                   </div>
@@ -156,22 +135,25 @@ export default function Profile() {
           ))}
         </div>
 
-        {/* Tabs Content */}
+        {/* Tabs — horizontally scrollable on mobile */}
         <div className="mt-12 max-w-5xl mx-auto">
           <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="w-full justify-start bg-transparent border-b border-border/40 rounded-none h-12 p-0 gap-8">
-              {["Overview", "Deck", "Inventory", "Pokemon"].map((tab) => (
-                <TabsTrigger
-                  key={tab}
-                  value={tab.toLowerCase()}
-                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary px-2 font-semibold transition-all h-full"
-                >
-                  {tab}
-                </TabsTrigger>
-              ))}
-            </TabsList>
+            <div className="overflow-x-auto scrollbar-hide border-b border-border/40">
+              <TabsList className="flex w-max min-w-full bg-transparent rounded-none h-12 p-0 gap-6 md:gap-8">
+                {["Overview", "Deck", "Inventory", "Pokemon"].map((tab) => (
+                  <TabsTrigger
+                    key={tab}
+                    value={tab.toLowerCase()}
+                    className="shrink-0 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary px-3 font-semibold transition-all h-full text-sm"
+                  >
+                    {tab}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
 
             <div className="pt-8">
+              {/* Overview */}
               <TabsContent value="overview">
                 <Card className="bg-card/20 border-dashed border-border/40">
                   <CardContent className="p-12 flex flex-col items-center text-center">
@@ -186,12 +168,11 @@ export default function Profile() {
                 </Card>
               </TabsContent>
 
+              {/* Deck */}
               <TabsContent value="deck">
                 {cardsLoading ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                    {[...Array(5)].map((_, i) => (
-                      <Skeleton key={i} className="aspect-[2/3] rounded-xl" />
-                    ))}
+                    {[...Array(5)].map((_, i) => <Skeleton key={i} className="aspect-[2/3] rounded-xl" />)}
                   </div>
                 ) : cards && cards.length > 0 ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
@@ -223,12 +204,11 @@ export default function Profile() {
                 )}
               </TabsContent>
 
+              {/* Inventory */}
               <TabsContent value="inventory">
                 {inventoryLoading ? (
                   <div className="space-y-2">
-                    {[...Array(5)].map((_, i) => (
-                      <Skeleton key={i} className="h-16 w-full" />
-                    ))}
+                    {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-16 w-full" />)}
                   </div>
                 ) : inventory && inventory.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -242,9 +222,7 @@ export default function Profile() {
                             <h4 className="font-semibold text-sm">{item.item}</h4>
                             <p className="text-muted-foreground text-xs">Quantity: {item.quantity}</p>
                           </div>
-                          <div className="text-primary font-bold">
-                            x{item.quantity}
-                          </div>
+                          <div className="text-primary font-bold">x{item.quantity}</div>
                         </CardContent>
                       </Card>
                     ))}
@@ -257,12 +235,11 @@ export default function Profile() {
                 )}
               </TabsContent>
 
+              {/* Pokemon */}
               <TabsContent value="pokemon">
                 {pokemonLoading ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                    {[...Array(5)].map((_, i) => (
-                      <Skeleton key={i} className="aspect-square rounded-xl" />
-                    ))}
+                    {[...Array(5)].map((_, i) => <Skeleton key={i} className="aspect-square rounded-xl" />)}
                   </div>
                 ) : pokemon && pokemon.length > 0 ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
@@ -272,7 +249,9 @@ export default function Profile() {
                         whileHover={{ scale: 1.05 }}
                         className="aspect-square rounded-xl bg-card border border-border/40 p-4 flex flex-col items-center justify-center text-center group"
                       >
-                        {p.sprite && <img src={p.sprite} alt={p.name} className="h-20 w-20 object-contain drop-shadow-glow" />}
+                        {p.sprite && (
+                          <img src={p.sprite} alt={p.name} className="h-20 w-20 object-contain drop-shadow-glow" />
+                        )}
                         <h4 className="mt-2 text-sm font-bold capitalize truncate w-full">{p.name}</h4>
                         <div className="flex gap-1 mt-1">
                           {p.types.map((type) => (
@@ -301,12 +280,10 @@ export default function Profile() {
           0%, 100% { box-shadow: 0 0 15px rgba(139, 92, 246, 0.5); }
           50% { box-shadow: 0 0 25px rgba(139, 92, 246, 0.8); }
         }
-        .animate-glow {
-          animation: glow 3s ease-in-out infinite;
-        }
-        .drop-shadow-glow {
-          filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.6));
-        }
+        .animate-glow { animation: glow 3s ease-in-out infinite; }
+        .drop-shadow-glow { filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.6)); }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
       `}} />
     </div>
   );
