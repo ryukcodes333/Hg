@@ -66,6 +66,7 @@ const userSchema = new mongoose.Schema(
     profile_pp: { type: String, default: null },
     profile_bg: { type: String, default: null },
     profile_frame: { type: Number, default: 1 },
+    jid: { type: String, unique: true, sparse: true },
   },
   { timestamps: true }
 );
