@@ -128,6 +128,15 @@ const userPokemonSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+const wishlistSchema = new mongoose.Schema(
+  {
+    phone: { type: String, required: true },
+    card_id: { type: mongoose.Schema.Types.ObjectId, ref: "Card", required: true },
+  },
+  { timestamps: true }
+);
+wishlistSchema.index({ phone: 1, card_id: 1 }, { unique: true });
+
 // ── Models ──────────────────────────────────────────────────────────────────
 
 export const User =
@@ -143,3 +152,5 @@ export const UserCard =
 export const UserPokemon =
   mongoose.models["UserPokemon"] ||
   mongoose.model("UserPokemon", userPokemonSchema);
+export const Wishlist =
+  mongoose.models["Wishlist"] || mongoose.model("Wishlist", wishlistSchema);
