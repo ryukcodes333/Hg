@@ -1,4 +1,4 @@
-import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
+import { Switch, Route, Router as WouterRouter, Redirect, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -12,6 +12,8 @@ import Leaderboard from "@/pages/Leaderboard";
 import Pokemon from "@/pages/Pokemon";
 import Cards from "@/pages/Cards";
 import Shop from "@/pages/Shop";
+import Guild from "@/pages/Guild";
+import Admin from "@/pages/Admin";
 import { Navbar } from "@/components/layout/Navbar";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 
@@ -34,6 +36,17 @@ function ProtectedRoute({ component: Component, ...props }: { component: any, pa
 }
 
 function Router() {
+  const [location] = useLocation();
+
+  // Admin page is fully isolated — no Navbar, no shared layout
+  if (location === "/admin" || location.startsWith("/admin/")) {
+    return (
+      <Switch>
+        <Route path="/admin" component={Admin} />
+      </Switch>
+    );
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground font-sans antialiased">
       <Navbar />
@@ -46,6 +59,7 @@ function Router() {
           <Route path="/pokemon" component={Pokemon} />
           <Route path="/cards" component={Cards} />
           <Route path="/shop" component={Shop} />
+          <Route path="/guild" component={Guild} />
           <Route path="/profile">
             {(params) => <ProtectedRoute component={Profile} path="/profile" {...params} />}
           </Route>
