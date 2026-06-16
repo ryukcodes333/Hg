@@ -7,6 +7,8 @@ import pokemonRouter from "./pokemon";
 import cardsRouter from "./cards";
 import shopRouter from "./shop";
 import statsRouter from "./stats";
+import adminRouter from "./admin";
+import guildRouter from "./guild";
 
 const router: IRouter = Router();
 
@@ -18,5 +20,7 @@ router.use(pokemonRouter);
 router.use(cardsRouter);
 router.use(shopRouter);
 router.use(statsRouter);
+router.use(adminRouter);
+router.use(guildRouter);
 
 export default router;
