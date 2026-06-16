@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Home, ShoppingBag, Trophy, Sword, Grid, User, LogOut, Sparkles } from "lucide-react";
+import { Menu, X, Home, ShoppingBag, Trophy, Sword, Grid, User, LogOut, Sparkles, Shield } from "lucide-react";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -26,6 +26,7 @@ export function Navbar() {
     { name: "Leaderboard", href: "/leaderboard", icon: Trophy },
     { name: "Pokémon",     href: "/pokemon",     icon: Sword },
     { name: "Cards",       href: "/cards",       icon: Grid },
+    { name: "Guilds",      href: "/guild",       icon: Shield },
   ];
 
   return (
